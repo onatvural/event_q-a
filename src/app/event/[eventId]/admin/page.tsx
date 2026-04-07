@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import useSWR from "swr";
 import { getVisitorId, timeAgo } from "@/lib/utils";
-import { ArrowLeft, ChevronUp, MessageCircle, Users } from 'lucide-react';
+import { ArrowLeft, Lock, Trash2, MessageCircle, Users, ChevronUp } from 'lucide-react';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -19,21 +19,58 @@ interface QuestionItem {
   hasVoted: boolean;
 }
 
-export default function QuestionFeed() {
+export default function AdminFeedPage() {
   const { eventId } = useParams<{ eventId: string }>();
   const router = useRouter();
 
   const [visitorId, setVisitorId] = useState("");
+  const [authenticated, setAuthenticated] = useState(false);
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
 
+  // Check session on mount
   useEffect(() => {
     setVisitorId(getVisitorId());
-  }, []);
+    if (sessionStorage.getItem(`event_admin_${eventId}`) === "true") {
+      setAuthenticated(true);
+    }
+  }, [eventId]);
 
-  // Fetch event data for speaker tabs
-  const { data: event } = useSWR(`/api/events/${eventId}`, fetcher);
+  // ─── Password verification ────────────────────────────────
+  const handleVerify = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError("");
+    setSubmitting(true);
 
-  // Build questions URL with filters
+    try {
+      const res = await fetch(`/api/events/${eventId}/admin/verify`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ password }),
+      });
+
+      if (res.ok) {
+        sessionStorage.setItem(`event_admin_${eventId}`, "true");
+        setAuthenticated(true);
+      } else {
+        const data = await res.json();
+        setError(data.error || "Invalid password");
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  // ─── Data fetching (only when authenticated) ──────────────
+  const { data: event } = useSWR(
+    authenticated ? `/api/events/${eventId}` : null,
+    fetcher
+  );
+
   const questionsUrl = (() => {
     const params = new URLSearchParams();
     if (visitorId) params.set("voterId", visitorId);
@@ -41,23 +78,21 @@ export default function QuestionFeed() {
     return `/api/events/${eventId}/questions?${params.toString()}`;
   })();
 
-  // Poll questions every 2s (only after visitorId is ready)
   const { data: questions, mutate } = useSWR<QuestionItem[]>(
-    visitorId ? questionsUrl : null,
+    authenticated && visitorId ? questionsUrl : null,
     fetcher,
     { refreshInterval: 2000 }
   );
 
-  // Poll live attendee count
   const { data: presence } = useSWR(
-    `/api/events/${eventId}/presence`,
+    authenticated ? `/api/events/${eventId}/presence` : null,
     fetcher,
     { refreshInterval: 5000 }
   );
 
-  // Heartbeat every 10s
+  // ─── Presence heartbeat ───────────────────────────────────
   useEffect(() => {
-    if (!eventId || !visitorId) return;
+    if (!authenticated || !eventId || !visitorId) return;
 
     const sendHeartbeat = () => {
       fetch(`/api/events/${eventId}/presence`, {
@@ -70,48 +105,77 @@ export default function QuestionFeed() {
     sendHeartbeat();
     const interval = setInterval(sendHeartbeat, 10000);
     return () => clearInterval(interval);
-  }, [eventId, visitorId]);
+  }, [authenticated, eventId, visitorId]);
 
-  const handleVote = useCallback(
+  // ─── Delete handler ───────────────────────────────────────
+  const handleDelete = useCallback(
     async (questionId: string) => {
-      if (!visitorId) return;
+      if (!window.confirm("Delete this question?")) return;
 
-      // Optimistic update
       mutate(
-        (current) =>
-          current?.map((q) =>
-            q.id === questionId
-              ? {
-                  ...q,
-                  hasVoted: !q.hasVoted,
-                  voteCount: q.hasVoted ? q.voteCount - 1 : q.voteCount + 1,
-                }
-              : q
-          ),
+        (current) => current?.filter((q) => q.id !== questionId),
         false
       );
 
       try {
-        await fetch(`/api/events/${eventId}/votes`, {
-          method: "POST",
+        await fetch(`/api/events/${eventId}/questions`, {
+          method: "DELETE",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            questionId,
-            voterId: visitorId,
-          }),
+          body: JSON.stringify({ questionId }),
         });
-        // Revalidate after server confirms
         mutate();
       } catch {
-        // Revert on error
         mutate();
       }
     },
-    [eventId, visitorId, mutate]
+    [eventId, mutate]
   );
 
   const speakers: { id: string; name: string }[] = event?.speakers ?? [];
 
+  // ─── State 1: Password Gate ───────────────────────────────
+  if (!authenticated) {
+    return (
+      <div className="min-h-[60vh] flex items-center justify-center px-4">
+        <div className="w-full max-w-sm bg-surface rounded-2xl shadow-sm border border-border p-8 space-y-6">
+          <div className="flex flex-col items-center gap-3">
+            <div className="w-12 h-12 rounded-full bg-cream border border-border flex items-center justify-center">
+              <Lock className="w-5 h-5 text-gold" />
+            </div>
+            <h1 className="text-xl font-bold font-serif text-primary">Admin Access</h1>
+            <p className="text-sm text-secondary text-center">
+              Enter the event admin password
+            </p>
+          </div>
+
+          <form onSubmit={handleVerify} className="space-y-4">
+            <input
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Password"
+              className="w-full px-4 py-2.5 rounded-xl border border-border bg-surface text-primary placeholder:text-disabled focus:ring-2 focus:ring-goldBorder/30 focus:border-goldBorder transition-all duration-200 outline-none"
+              autoFocus
+            />
+
+            {error && (
+              <p className="text-sm text-red-500 text-center">{error}</p>
+            )}
+
+            <button
+              type="submit"
+              disabled={submitting || !password}
+              className="w-full py-2.5 rounded-xl bg-btnPrimary text-white text-sm font-medium hover:bg-btnHover transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+            >
+              {submitting ? "Verifying..." : "Submit"}
+            </button>
+          </form>
+        </div>
+      </div>
+    );
+  }
+
+  // ─── State 2: Admin Feed ──────────────────────────────────
   return (
     <div className="space-y-5">
       {/* Header */}
@@ -121,7 +185,7 @@ export default function QuestionFeed() {
           className="inline-flex items-center gap-1.5 text-secondary text-sm hover:text-gold transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
-          Speakers
+          Back
         </button>
 
         {/* Live count */}
@@ -135,7 +199,7 @@ export default function QuestionFeed() {
         )}
       </div>
 
-      <h1 className="text-xl font-bold font-serif text-primary">Questions</h1>
+      <h1 className="text-xl font-bold font-serif text-primary">Admin Feed</h1>
 
       {/* Speaker filter tabs */}
       <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1 scrollbar-hide">
@@ -178,7 +242,6 @@ export default function QuestionFeed() {
           <div className="text-center py-16 space-y-3">
             <MessageCircle className="w-10 h-10 text-disabled mx-auto" />
             <p className="text-secondary font-medium">No questions yet</p>
-            <p className="text-tertiary text-sm">Be the first to ask!</p>
           </div>
         ) : (
           questions.map((q) => (
@@ -206,18 +269,22 @@ export default function QuestionFeed() {
                   </span>
                 </div>
 
-                {/* Vote button */}
-                <button
-                  onClick={() => handleVote(q.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 active:scale-95 ${
-                    q.hasVoted
-                      ? "bg-activeBg text-gold border border-goldBorder"
-                      : "bg-voteResting text-secondary border border-border hover:border-goldBorder"
-                  }`}
-                >
-                  <ChevronUp className="w-4 h-4" />
-                  {q.voteCount}
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Delete button */}
+                  <button
+                    onClick={() => handleDelete(q.id)}
+                    className="p-1.5 rounded-lg text-disabled hover:text-red-500 hover:bg-red-50 transition-colors"
+                    title="Delete question"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+
+                  {/* Vote count (display only) */}
+                  <div className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium bg-voteResting text-secondary border border-border">
+                    <ChevronUp className="w-4 h-4" />
+                    {q.voteCount}
+                  </div>
+                </div>
               </div>
             </div>
           ))
