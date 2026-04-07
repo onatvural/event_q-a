@@ -4,7 +4,7 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import useSWR from 'swr';
-import { Plus, Calendar, Globe, Pencil, Trash2, Users, MessageCircle } from 'lucide-react';
+import { Plus, Calendar, Globe, Pencil, Trash2, Users, MessageCircle, ExternalLink } from 'lucide-react';
 
 interface EventWithCounts {
   id: string;
@@ -140,6 +140,15 @@ export default function AdminEventsPage() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2 flex-shrink-0">
+                  <a
+                    href={`/event/${event.id}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="p-2 rounded-xl border border-border text-secondary hover:text-gold hover:border-goldBorder transition-colors"
+                    title="Open event page"
+                  >
+                    <ExternalLink className="w-4 h-4" />
+                  </a>
                   <button
                     onClick={() => router.push(`/admin/events/${event.id}/edit`)}
                     className="p-2 rounded-xl border border-border text-secondary hover:text-primary hover:bg-cream transition-colors"
