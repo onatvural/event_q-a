@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import useSWR from "swr";
 import { getVisitorId, timeAgo } from "@/lib/utils";
-import { ArrowLeft, ChevronUp, MessageCircle, Users } from 'lucide-react';
+import { ArrowLeft, ChevronUp, MessageCircle, Users, Trash2 } from 'lucide-react';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -25,9 +25,11 @@ export default function QuestionFeed() {
 
   const [visitorId, setVisitorId] = useState("");
   const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
+  const [isAdmin, setIsAdmin] = useState(false);
 
   useEffect(() => {
     setVisitorId(getVisitorId());
+    setIsAdmin(sessionStorage.getItem("admin_authenticated") === "true");
   }, []);
 
   // Fetch event data for speaker tabs
@@ -108,6 +110,29 @@ export default function QuestionFeed() {
       }
     },
     [eventId, visitorId, mutate]
+  );
+
+  const handleDelete = useCallback(
+    async (questionId: string) => {
+      if (!window.confirm("Delete this question?")) return;
+
+      mutate(
+        (current) => current?.filter((q) => q.id !== questionId),
+        false
+      );
+
+      try {
+        await fetch(`/api/events/${eventId}/questions`, {
+          method: "DELETE",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ questionId }),
+        });
+        mutate();
+      } catch {
+        mutate();
+      }
+    },
+    [eventId, mutate]
   );
 
   const speakers: { id: string; name: string }[] = event?.speakers ?? [];
@@ -206,18 +231,31 @@ export default function QuestionFeed() {
                   </span>
                 </div>
 
-                {/* Vote button */}
-                <button
-                  onClick={() => handleVote(q.id)}
-                  className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 active:scale-95 ${
-                    q.hasVoted
-                      ? "bg-activeBg text-gold border border-goldBorder"
-                      : "bg-voteResting text-secondary border border-border hover:border-goldBorder"
-                  }`}
-                >
-                  <ChevronUp className="w-4 h-4" />
-                  {q.voteCount}
-                </button>
+                <div className="flex items-center gap-2">
+                  {/* Admin delete */}
+                  {isAdmin && (
+                    <button
+                      onClick={() => handleDelete(q.id)}
+                      className="p-1.5 rounded-lg text-disabled hover:text-red-500 hover:bg-red-50 transition-colors"
+                      title="Delete question"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+
+                  {/* Vote button */}
+                  <button
+                    onClick={() => handleVote(q.id)}
+                    className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-full text-sm font-medium transition-all duration-150 active:scale-95 ${
+                      q.hasVoted
+                        ? "bg-activeBg text-gold border border-goldBorder"
+                        : "bg-voteResting text-secondary border border-border hover:border-goldBorder"
+                    }`}
+                  >
+                    <ChevronUp className="w-4 h-4" />
+                    {q.voteCount}
+                  </button>
+                </div>
               </div>
             </div>
           ))

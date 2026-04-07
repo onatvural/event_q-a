@@ -64,6 +64,35 @@ export async function GET(
   }
 }
 
+export async function DELETE(
+  request: NextRequest,
+  { params }: { params: Promise<{ eventId: string }> }
+) {
+  try {
+    await params;
+    const { questionId } = await request.json();
+
+    if (!questionId) {
+      return NextResponse.json(
+        { error: 'questionId is required' },
+        { status: 400 }
+      );
+    }
+
+    await getDb()
+      .delete(schema.questions)
+      .where(eq(schema.questions.id, questionId));
+
+    return NextResponse.json({ success: true });
+  } catch (error) {
+    console.error('DELETE /api/events/[eventId]/questions error:', error);
+    return NextResponse.json(
+      { error: error instanceof Error ? error.message : 'Internal server error' },
+      { status: 500 }
+    );
+  }
+}
+
 export async function POST(
   request: NextRequest,
   { params }: { params: Promise<{ eventId: string }> }
