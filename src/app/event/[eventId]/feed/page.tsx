@@ -145,7 +145,7 @@ export default function QuestionFeed() {
           onClick={() => router.push(`/event/${eventId}`)}
           className="inline-flex items-center gap-1.5 text-secondary text-sm hover:text-gold transition-colors"
         >
-          <ArrowLeft className="w-4 h-4" />
+          <ArrowLeft className="w-6 h-6" />
           Speakers
         </button>
 
@@ -154,7 +154,7 @@ export default function QuestionFeed() {
           <div className="inline-flex items-center gap-2 bg-btnPrimary text-white rounded-full px-3 py-1">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
             <span className="text-[11px] font-medium uppercase tracking-widest">Live</span>
-            <Users className="w-3.5 h-3.5" />
+            <Users className="w-5 h-5" />
             <span className="text-[11px] font-medium">{presence.activeVisitors}</span>
           </div>
         )}
@@ -201,7 +201,7 @@ export default function QuestionFeed() {
           </div>
         ) : questions.length === 0 ? (
           <div className="text-center py-16 space-y-3">
-            <MessageCircle className="w-10 h-10 text-disabled mx-auto" />
+            <MessageCircle className="w-14 h-14 text-disabled mx-auto" />
             <p className="text-secondary font-medium">No questions yet</p>
             <p className="text-tertiary text-sm">Be the first to ask!</p>
           </div>
@@ -239,7 +239,7 @@ export default function QuestionFeed() {
                       className="p-1.5 rounded-lg text-disabled hover:text-red-500 hover:bg-red-50 transition-colors"
                       title="Delete question"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-6 h-6" />
                     </button>
                   )}
 
@@ -252,7 +252,7 @@ export default function QuestionFeed() {
                         : "bg-voteResting text-secondary border border-border hover:border-goldBorder"
                     }`}
                   >
-                    <ChevronUp className="w-4 h-4" />
+                    <ChevronUp className="w-6 h-6" />
                     {q.voteCount}
                   </button>
                 </div>

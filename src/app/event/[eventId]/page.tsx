@@ -77,7 +77,7 @@ export default function EventSpeakerList() {
           <div className="inline-flex items-center gap-2 bg-btnPrimary text-white rounded-full px-3 py-1">
             <span className="w-1.5 h-1.5 rounded-full bg-red-500 animate-pulse" />
             <span className="text-[11px] font-medium uppercase tracking-widest">Live Now</span>
-            <Users className="w-3.5 h-3.5" />
+            <Users className="w-5 h-5" />
             <span className="text-[11px] font-medium">{presence.activeVisitors}</span>
           </div>
         )}
