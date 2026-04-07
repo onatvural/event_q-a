@@ -133,7 +133,7 @@ export default function EditEventPage() {
         href="/admin/events"
         className="inline-flex items-center gap-1.5 text-sm text-secondary hover:text-primary transition-colors"
       >
-        <ArrowLeft className="w-6 h-6" />
+        <ArrowLeft className="w-4 h-4" />
         Back to Events
       </Link>
 
@@ -223,7 +223,7 @@ export default function EditEventPage() {
                       className="p-1 text-secondary hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                       title="Remove speaker"
                     >
-                      <Trash2 className="w-6 h-6" />
+                      <Trash2 className="w-4 h-4" />
                     </button>
                   )}
                 </div>
@@ -250,7 +250,7 @@ export default function EditEventPage() {
             onClick={addSpeaker}
             className="w-full py-2 px-4 rounded-xl border border-dashed border-border text-secondary hover:border-goldBorder hover:text-gold transition-colors text-sm font-medium flex items-center justify-center gap-1.5"
           >
-            <Plus className="w-6 h-6" /> Add Speaker
+            <Plus className="w-4 h-4" /> Add Speaker
           </button>
         </div>
 

@@ -28,7 +28,7 @@ function StepIndicator({ currentStep }: { currentStep: number }) {
               }`}
             >
               {i < currentStep ? (
-                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
+                <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2.5} stroke="currentColor">
                   <path strokeLinecap="round" strokeLinejoin="round" d="m4.5 12.75 6 6 9-13.5" />
                 </svg>
               ) : (
@@ -275,7 +275,7 @@ export default function CreateEventPage() {
                         className="p-1 text-secondary hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
                         title="Remove speaker"
                       >
-                        <Trash2 className="w-6 h-6" />
+                        <Trash2 className="w-4 h-4" />
                       </button>
                     )}
                   </div>
@@ -301,7 +301,7 @@ export default function CreateEventPage() {
               onClick={addSpeaker}
               className="w-full py-2 px-4 rounded-xl border border-dashed border-border text-secondary hover:border-goldBorder hover:text-gold transition-colors text-sm font-medium flex items-center justify-center gap-1.5"
             >
-              <Plus className="w-6 h-6" /> Add Speaker
+              <Plus className="w-4 h-4" /> Add Speaker
             </button>
 
             <div className="flex gap-3">

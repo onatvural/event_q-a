@@ -64,7 +64,7 @@ export default function AdminEventsPage() {
           href="/admin/create"
           className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-btnPrimary text-white font-medium text-sm hover:bg-btnHover transition-colors"
         >
-          <Plus className="w-6 h-6" />
+          <Plus className="w-4 h-4" />
           Create Event
         </Link>
       </div>
@@ -98,14 +98,14 @@ export default function AdminEventsPage() {
       {/* Empty state */}
       {!isLoading && events.length === 0 && (
         <div className="bg-surface rounded-2xl shadow-sm border border-border p-12 flex flex-col items-center justify-center">
-          <Calendar className="w-14 h-14 text-disabled mb-3" />
+          <Calendar className="w-10 h-10 text-disabled mb-3" />
           <p className="text-secondary font-medium">No events yet</p>
           <p className="text-tertiary text-sm mt-1">Create your first event</p>
           <Link
             href="/admin/create"
             className="mt-4 inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-btnPrimary text-white font-medium text-sm hover:bg-btnHover transition-colors"
           >
-            <Plus className="w-6 h-6" />
+            <Plus className="w-4 h-4" />
             Create Event
           </Link>
         </div>
@@ -130,11 +130,11 @@ export default function AdminEventsPage() {
                   <p className="text-sm text-secondary mt-1">{formatDate(event.date)}</p>
                   <div className="flex items-center gap-3 mt-2.5">
                     <span className="inline-flex items-center gap-1 text-xs font-medium text-secondary bg-cream px-2.5 py-1 rounded-full">
-                      <Users className="w-5 h-5" />
+                      <Users className="w-3.5 h-3.5" />
                       {event.speakerCount} speaker{event.speakerCount !== 1 ? 's' : ''}
                     </span>
                     <span className="inline-flex items-center gap-1 text-xs font-medium text-secondary bg-cream px-2.5 py-1 rounded-full">
-                      <MessageCircle className="w-5 h-5" />
+                      <MessageCircle className="w-3.5 h-3.5" />
                       {event.questionCount} question{event.questionCount !== 1 ? 's' : ''}
                     </span>
                   </div>
@@ -145,14 +145,14 @@ export default function AdminEventsPage() {
                     className="p-2 rounded-xl border border-border text-secondary hover:text-primary hover:bg-cream transition-colors"
                     title="Edit event"
                   >
-                    <Pencil className="w-6 h-6" />
+                    <Pencil className="w-4 h-4" />
                   </button>
                   <button
                     onClick={() => handleDelete(event.id)}
                     className="p-2 rounded-xl border border-border text-secondary hover:text-red-500 hover:bg-red-50 transition-colors"
                     title="Delete event"
                   >
-                    <Trash2 className="w-6 h-6" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 </div>
               </div>

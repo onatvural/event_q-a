@@ -67,7 +67,7 @@ export default function AskQuestion() {
         onClick={() => router.push(`/event/${eventId}`)}
         className="inline-flex items-center gap-1.5 text-secondary text-sm hover:text-gold transition-colors"
       >
-        <ArrowLeft className="w-6 h-6" />
+        <ArrowLeft className="w-4 h-4" />
         Back to speakers
       </button>
 
