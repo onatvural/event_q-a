@@ -132,9 +132,7 @@ export default function CreateEventPage() {
       }
 
       // Generate QR code
-      const baseUrl =
-        process.env.NEXT_PUBLIC_BASE_URL ||
-        (typeof window !== 'undefined' ? window.location.origin : '');
+      const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
       const eventUrl = `${baseUrl}/event/${event.id}`;
 
       const qrUrl = await QRCode.toDataURL(eventUrl, {
@@ -153,9 +151,7 @@ export default function CreateEventPage() {
   }
 
   function getEventUrl() {
-    const baseUrl =
-      process.env.NEXT_PUBLIC_BASE_URL ||
-      (typeof window !== 'undefined' ? window.location.origin : '');
+    const baseUrl = typeof window !== 'undefined' ? window.location.origin : '';
     return `${baseUrl}/event/${createdEventId}`;
   }
 
