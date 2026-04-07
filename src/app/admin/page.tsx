@@ -30,7 +30,7 @@ export default function AdminLoginPage() {
       }
 
       sessionStorage.setItem('admin_authenticated', 'true');
-      router.push('/admin/create');
+      router.push('/admin/events');
     } catch {
       setError('Something went wrong. Please try again.');
       setLoading(false);
