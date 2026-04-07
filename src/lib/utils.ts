@@ -65,3 +65,36 @@ export function hashGradient(str: string): { from: string; to: string } {
   }
   return AVATAR_GRADIENTS[Math.abs(hash) % AVATAR_GRADIENTS.length];
 }
+
+export function getFingerprint(): string {
+  if (typeof window === "undefined") return "";
+  const key = "qa_fingerprint";
+  let fp = localStorage.getItem(key);
+  if (fp) return fp;
+
+  const signals = [
+    navigator.userAgent,
+    navigator.language,
+    navigator.languages?.join(",") ?? "",
+    screen.width + "x" + screen.height,
+    screen.colorDepth.toString(),
+    new Date().getTimezoneOffset().toString(),
+    navigator.hardwareConcurrency?.toString() ?? "",
+    navigator.platform ?? "",
+    (navigator as unknown as Record<string, boolean>).cookieEnabled ? "1" : "0",
+    typeof (window as unknown as Record<string, unknown>).ontouchstart !== "undefined" ? "1" : "0",
+    window.devicePixelRatio?.toString() ?? "",
+  ];
+
+  // Simple hash
+  const raw = signals.join("|");
+  let h = 0;
+  for (let i = 0; i < raw.length; i++) {
+    const ch = raw.charCodeAt(i);
+    h = ((h << 5) - h) + ch;
+    h |= 0;
+  }
+  fp = "fp_" + Math.abs(h).toString(36);
+  localStorage.setItem(key, fp);
+  return fp;
+}

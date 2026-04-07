@@ -12,6 +12,7 @@ export async function GET(
     const { eventId } = await params;
     const { searchParams } = new URL(request.url);
     const voterId = searchParams.get('voterId');
+    const fingerprint = searchParams.get('fingerprint');
     const speakerId = searchParams.get('speakerId');
 
     const voteCountExpr = sql<number>`(
@@ -19,11 +20,14 @@ export async function GET(
       WHERE votes.question_id = ${schema.questions.id}
     )`;
 
-    const hasVotedExpr = voterId
+    const hasVotedExpr = (voterId || fingerprint)
       ? sql<boolean>`EXISTS(
           SELECT 1 FROM votes
           WHERE votes.question_id = ${schema.questions.id}
-          AND votes.voter_id = ${voterId}
+          AND (
+            ${voterId ? sql`votes.voter_id = ${voterId}` : sql`false`}
+            OR ${fingerprint ? sql`votes.fingerprint = ${fingerprint}` : sql`false`}
+          )
         )`
       : sql<boolean>`false`;
 

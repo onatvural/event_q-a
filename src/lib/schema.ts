@@ -54,10 +54,13 @@ export const votes = pgTable(
       .notNull()
       .references(() => questions.id, { onDelete: "cascade" }),
     voterId: text("voter_id").notNull(),
+    fingerprint: text("fingerprint"),
+    ip: text("ip"),
     createdAt: timestamp("created_at").defaultNow(),
   },
   (table) => ({
     uniqueVote: unique().on(table.questionId, table.voterId),
+    // unique_fingerprint partial index created via migration (WHERE fingerprint IS NOT NULL)
   })
 );
 

@@ -3,7 +3,7 @@
 import { useParams, useRouter } from "next/navigation";
 import { useState, useEffect, useCallback } from "react";
 import useSWR from "swr";
-import { getVisitorId, timeAgo } from "@/lib/utils";
+import { getVisitorId, getFingerprint, timeAgo } from "@/lib/utils";
 import { ArrowLeft, ChevronUp, MessageCircle, Users } from 'lucide-react';
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
@@ -24,10 +24,12 @@ export default function QuestionFeed() {
   const router = useRouter();
 
   const [visitorId, setVisitorId] = useState("");
+  const [fingerprint, setFingerprint] = useState("");
   const [activeSpeaker, setActiveSpeaker] = useState<string | null>(null);
 
   useEffect(() => {
     setVisitorId(getVisitorId());
+    setFingerprint(getFingerprint());
   }, []);
 
   // Fetch event data for speaker tabs
@@ -37,6 +39,7 @@ export default function QuestionFeed() {
   const questionsUrl = (() => {
     const params = new URLSearchParams();
     if (visitorId) params.set("voterId", visitorId);
+    if (fingerprint) params.set("fingerprint", fingerprint);
     if (activeSpeaker) params.set("speakerId", activeSpeaker);
     return `/api/events/${eventId}/questions?${params.toString()}`;
   })();
@@ -98,6 +101,7 @@ export default function QuestionFeed() {
           body: JSON.stringify({
             questionId,
             voterId: visitorId,
+            fingerprint,
           }),
         });
         // Revalidate after server confirms
