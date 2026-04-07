@@ -4,7 +4,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef } from "react";
 import useSWR from "swr";
 import { getVisitorId, getInitials, hashGradient } from "@/lib/utils";
-import { Users } from "lucide-react";
+import { Users, MessageCircle } from "lucide-react";
 
 const fetcher = (url: string) => fetch(url).then((r) => r.json());
 
@@ -83,6 +83,15 @@ export default function EventSpeakerList() {
         )}
       </div>
 
+      {/* View Feed button */}
+      <button
+        onClick={() => router.push(`/event/${eventId}/feed`)}
+        className="w-full bg-surface border border-border text-primary font-medium py-3 rounded-xl hover:border-goldBorder hover:shadow-sm active:scale-[0.98] transition-all duration-200 flex items-center justify-center gap-2"
+      >
+        <MessageCircle className="w-4 h-4 text-gold" />
+        View Questions Feed
+      </button>
+
       {/* Speaker cards */}
       <div className="space-y-3">
         {event.speakers?.map(
@@ -130,15 +139,6 @@ export default function EventSpeakerList() {
         )}
       </div>
 
-      {/* Feed link */}
-      <div className="text-center pt-2">
-        <button
-          onClick={() => router.push(`/event/${eventId}/feed`)}
-          className="text-gold font-medium text-sm hover:text-goldBorder transition-colors"
-        >
-          View Questions Feed &rarr;
-        </button>
-      </div>
     </div>
   );
 }
